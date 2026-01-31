@@ -3,8 +3,9 @@ package ru.practicum.stats.client;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import ru.practicum.stats.dto.CreateEndpointHitDto;
+import ru.practicum.stats.dto.ResponseEndpointHitDto;
 import ru.practicum.stats.dto.ViewStats;
-import ru.practicum.stats.server.model.EndpointHitEntity;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -21,12 +22,14 @@ public class StatsClient {
         this.restTemplate = restTemplate;
     }
 
-    public void sendHit(EndpointHitEntity hit) {
-        restTemplate.postForEntity(serverUrl + "/hit", hit, Void.class);
+    // Используем DTO вместо Entity
+    public ResponseEndpointHitDto sendHit(CreateEndpointHitDto hitDto) {
+        ResponseEntity<ResponseEndpointHitDto> response =
+                restTemplate.postForEntity(serverUrl + "/hit", hitDto, ResponseEndpointHitDto.class);
+        return response.getBody();
     }
 
     public List<ViewStats> getStats(String start, String end, List<String> uris, boolean unique) {
-
         StringBuilder url = new StringBuilder(serverUrl + "/stats?start=")
                 .append(URLEncoder.encode(start, StandardCharsets.UTF_8))
                 .append("&end=")
