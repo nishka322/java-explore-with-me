@@ -1,5 +1,8 @@
 package ru.practicum.stats.client;
 
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -9,43 +12,64 @@ import ru.practicum.stats.dto.ViewStats;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class StatsClient {
 
     private final RestTemplate restTemplate;
-    private final String serverUrl = "http://localhost:9090";
+    private final String serverUrl;
 
-    public StatsClient(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public StatsClient(
+            RestTemplateBuilder restTemplateBuilder,
+            @Value("${stats.server.url}") String serverUrl
+    ) {
+        this.restTemplate = restTemplateBuilder.build();
+        this.serverUrl = serverUrl;
     }
 
-    // Используем DTO вместо Entity
-    public ResponseEndpointHitDto sendHit(CreateEndpointHitDto hitDto) {
+    public ResponseEndpointHitDto sendHit(HttpServletRequest request) {
+        CreateEndpointHitDto hitDto = CreateEndpointHitDto.builder()
+                .app(serverUrl)
+                .uri(request.getRequestURI())
+                .ip(request.getRemoteAddr())
+                .timestamp(LocalDateTime.now())
+                .build();
+
         ResponseEntity<ResponseEndpointHitDto> response =
-                restTemplate.postForEntity(serverUrl + "/hit", hitDto, ResponseEndpointHitDto.class);
+                restTemplate.postForEntity(
+                        serverUrl + "/hit",
+                        hitDto,
+                        ResponseEndpointHitDto.class
+                );
+
         return response.getBody();
     }
 
     public List<ViewStats> getStats(String start, String end, List<String> uris, boolean unique) {
-        StringBuilder url = new StringBuilder(serverUrl + "/stats?start=")
-                .append(URLEncoder.encode(start, StandardCharsets.UTF_8))
-                .append("&end=")
-                .append(URLEncoder.encode(end, StandardCharsets.UTF_8));
+        String encodedStart = URLEncoder.encode(start, StandardCharsets.UTF_8);
+        String encodedEnd = URLEncoder.encode(end, StandardCharsets.UTF_8);
+
+        StringBuilder urlBuilder = new StringBuilder(serverUrl)
+                .append("/stats?start=").append(encodedStart)
+                .append("&end=").append(encodedEnd);
 
         if (uris != null && !uris.isEmpty()) {
-            for (String uri : uris) {
-                url.append("&uris=").append(URLEncoder.encode(uri, StandardCharsets.UTF_8));
-            }
+            String encodedUris = uris.stream()
+                    .map(uri -> URLEncoder.encode(uri, StandardCharsets.UTF_8))
+                    .collect(Collectors.joining(","));
+            urlBuilder.append("&uris=").append(encodedUris);
         }
 
-        url.append("&unique=").append(unique);
+        urlBuilder.append("&unique=").append(unique);
 
         ResponseEntity<ViewStats[]> response =
-                restTemplate.getForEntity(url.toString(), ViewStats[].class);
+                restTemplate.getForEntity(urlBuilder.toString(), ViewStats[].class);
 
-        return Arrays.asList(response.getBody());
+        ViewStats[] body = response.getBody();
+        return body != null ? Arrays.asList(body) : List.of();
     }
 }

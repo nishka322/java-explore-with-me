@@ -19,7 +19,6 @@ import java.util.List;
 public class StatisticController {
 
     private final StatisticServiceImpl statsService;
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
@@ -31,7 +30,7 @@ public class StatisticController {
     public List<ViewStats> stats(@RequestParam String start,
                                  @RequestParam String end,
                                  @RequestParam(required = false) List<String> uris,
-                                 @RequestParam(required = false, defaultValue = "false") boolean unique) {
+                                 @RequestParam(required = false) boolean unique) {
 
         ListViewStats result = statsService.getStats(start, end, uris, unique);
 

@@ -18,13 +18,15 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StatisticServiceImpl implements StatisticService {
     private final StatisticRepository statistics;
-    private final StatisticMapper mapper;
-
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
     public ResponseEndpointHitDto addEndpointHit(CreateEndpointHitDto createEndpointHitDto) {
-        return mapper.toDto(statistics.save(mapper.toEntity(createEndpointHitDto)));
+        return StatisticMapper.toDto(
+                statistics.save(
+                        StatisticMapper.toEntity(createEndpointHitDto)
+                )
+        );
     }
 
     @Override

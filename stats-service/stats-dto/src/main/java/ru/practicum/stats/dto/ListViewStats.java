@@ -14,5 +14,5 @@ import java.util.List;
 @AllArgsConstructor
 public class ListViewStats {
     @JsonValue
-    private List<ru.practicum.stats.dto.ViewStats> viewStats;
+    private List<ViewStats> viewStats;
 }
