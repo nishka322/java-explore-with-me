@@ -1,37 +1,33 @@
 package ru.practicum.stats.dto;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 @Builder
 public class CreateEndpointHitDto {
 
-    private static final DateTimeFormatter FORMATTER =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-    private final String app;
-    private final String uri;
-    private final String ip;
-
+    @NotBlank
+    @Size(max = 255)
+    private String app;
+    @NotBlank
+    @Size(max = 255)
+    private String uri;
+    @NotBlank
+    @Size(max = 255)
+    private String ip;
+    @NotNull
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private final LocalDateTime timestamp;
+    private LocalDateTime timestamp;
 
-    @JsonCreator
-    public CreateEndpointHitDto(
-            @JsonProperty("app") String app,
-            @JsonProperty("uri") String uri,
-            @JsonProperty("ip") String ip,
-            @JsonProperty("timestamp") LocalDateTime timestamp) {
-        this.app = app;
-        this.uri = uri;
-        this.ip = ip;
-        this.timestamp = timestamp;
-    }
 }
