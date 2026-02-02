@@ -9,8 +9,6 @@ import ru.practicum.stats.dto.ListViewStats;
 import ru.practicum.stats.dto.ResponseEndpointHitDto;
 import ru.practicum.stats.dto.ViewStats;
 import ru.practicum.stats.server.service.StatisticServiceImpl;
-
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
