@@ -22,18 +22,21 @@ public class StatsClient {
 
     private final RestTemplate restTemplate;
     private final String serverUrl;
+    private final String appName;
 
     public StatsClient(
             RestTemplateBuilder restTemplateBuilder,
-            @Value("${stats.server.url}") String serverUrl
+            @Value("${stats.server.url}") String serverUrl,
+            @Value("${spring.application.name}") String appName
     ) {
         this.restTemplate = restTemplateBuilder.build();
         this.serverUrl = serverUrl;
+        this.appName = appName;
     }
 
     public ResponseEndpointHitDto sendHit(HttpServletRequest request) {
         CreateEndpointHitDto hitDto = CreateEndpointHitDto.builder()
-                .app(serverUrl)
+                .app(appName)
                 .uri(request.getRequestURI())
                 .ip(request.getRemoteAddr())
                 .timestamp(LocalDateTime.now())
