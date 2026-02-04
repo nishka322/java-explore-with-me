@@ -6,6 +6,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,9 +30,11 @@ import ru.practicum.stats.dto.ViewStatsDto;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
@@ -267,7 +270,9 @@ public class EventServiceImpl implements EventService {
         try {
             if (rangeStart != null) start = LocalDateTime.parse(rangeStart, dateFormatter);
             if (rangeEnd != null) end = LocalDateTime.parse(rangeEnd, dateFormatter);
-        } catch (Exception ignored) {}
+        } catch (DateTimeParseException e) {
+            log.debug("Неверный формат даты: {}", e.getMessage());
+        }
 
         checkDateTime(start, end);
 
@@ -408,7 +413,7 @@ public class EventServiceImpl implements EventService {
                     start = createdOn;
                 }
             } catch (Exception e) {
-                // Игнорируем ошибку парсинга
+                log.debug("Ошибка парсинга createdOn для события id={}: {}", event.getId(), e.getMessage());
             }
 
             String uri = "/events/" + event.getId();
