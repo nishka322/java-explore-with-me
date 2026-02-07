@@ -1,4 +1,23 @@
+version: '3.1'
+
 services:
+  stats-db:
+    image: postgres:15.1-alpine
+    container_name: EWM-stats-db
+    ports:
+      - "6541:5432"
+    environment:
+      - POSTGRES_DB=stats
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - stats-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   stats-server:
     restart: on-failure
     build: ./stats-service/stats-server
@@ -15,29 +34,10 @@ services:
       - POSTGRES_PASSWORD=postgres
       - DB_HOST=stats-db
       - DB_PORT=5432
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/stats
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
       - SPRING_PROFILES_ACTIVE=docker
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9090/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  stats-db:
-    image: postgres:15.1-alpine
-    container_name: EWM-stats-db
-    ports:
-      - "6541:5432"
-    environment:
-      - POSTGRES_DB=stats
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    volumes:
-      - stats-db-data:/var/lib/postgresql/data
 
   ewm-db:
     image: postgres:15.1-alpine
@@ -48,20 +48,41 @@ services:
       - POSTGRES_DB=ewm-server
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ewm-db-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
-    volumes:
-      - ewm-db-data:/var/lib/postgresql/data
 
   ewm-service:
-    image: alpine:latest
-    command: sleep infinity
+    build: ./main-service
+    image: ewm-service-image
     container_name: ewm-service
     depends_on:
-      - ewm-db
+      ewm-db:
+        condition: service_healthy
+      stats-server:
+        condition: service_started
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_NAME=ewm-server
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - DB_HOST=ewm-db
+      - DB_PORT=5432
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm-server
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - STATS_SERVER_URL=http://ewm-stats-server:9090
+      - SPRING_PROFILES_ACTIVE=docker
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   stats-db-data:
