@@ -2,7 +2,7 @@ package ru.practicum.stats.server.mapper;
 
 import org.springframework.stereotype.Component;
 import ru.practicum.stats.dto.EndpointHitDto;
-import ru.practicum.stats.server.constants.Pattern;
+import ru.practicum.stats.server.config.ConfigUtil;
 import ru.practicum.stats.server.model.EndpointHit;
 
 import java.time.LocalDateTime;
@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter;
 @Component
 public class EndpointHitMapper {
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(Pattern.DATE);
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(ConfigUtil.DATE);
 
     public EndpointHit toEntity(EndpointHitDto endpointHitDto) {
         if (endpointHitDto == null) {

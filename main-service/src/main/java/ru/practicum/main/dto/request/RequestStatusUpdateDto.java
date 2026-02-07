@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.practicum.main.enums.RequestStatusToUpdate;
+import ru.practicum.main.enumeration.RequestStatusToUpdate;
 
 import java.util.List;
 

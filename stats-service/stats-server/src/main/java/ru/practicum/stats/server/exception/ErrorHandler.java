@@ -12,5 +12,4 @@ public class ErrorHandler {
     public ErrorResponse handleWrongTimeExceptionException(final WrongTimeException e) {
         return new ErrorResponse(e.getMessage());
     }
-
 }

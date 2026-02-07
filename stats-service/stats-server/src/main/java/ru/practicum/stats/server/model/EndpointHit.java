@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
-import ru.practicum.stats.server.constants.Pattern;
+import ru.practicum.stats.server.config.ConfigUtil;
 
 import java.time.LocalDateTime;
 
@@ -19,6 +19,6 @@ public class EndpointHit {
     private String app;
     private String uri;
     private String ip;
-    @DateTimeFormat(pattern = Pattern.DATE)
+    @DateTimeFormat(pattern = ConfigUtil.DATE)
     private LocalDateTime timestamp;
 }

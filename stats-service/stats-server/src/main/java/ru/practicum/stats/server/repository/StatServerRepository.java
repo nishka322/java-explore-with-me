@@ -47,5 +47,4 @@ public interface StatServerRepository extends JpaRepository<EndpointHit, Long> {
             "GROUP BY vs.app, vs.uri " +
             "ORDER BY COUNT(vs.ip) DESC")
     List<ViewStats> getViewStatsByStartAndEndTime(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
-
 }
