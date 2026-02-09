@@ -20,9 +20,7 @@ import ru.practicum.main.service.RequestService;
 import ru.practicum.main.service.UserService;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -141,32 +139,5 @@ public class RequestServiceImpl implements RequestService {
         }
 
         return requestRepository.findByEventInitiatorId(userId);
-    }
-
-    @Override
-    public Long getConfirmedRequestsCountForEvent(Long eventId) {
-        Integer count = requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
-        return count != null ? count.longValue() : 0L;
-    }
-
-    @Override
-    public Map<Long, Long> getConfirmedRequestsCountForEvents(List<Event> events) {
-        List<Event> publishedEvents = events.stream()
-                .filter(event -> event.getPublishedOn() != null)
-                .collect(Collectors.toList());
-
-        if (publishedEvents.isEmpty()) {
-            return new HashMap<>();
-        }
-
-        List<Request> confirmedRequests = requestRepository.findAllByEventInAndStatus(
-                publishedEvents, RequestStatus.CONFIRMED
-        );
-
-        return confirmedRequests.stream()
-                .collect(Collectors.groupingBy(
-                        request -> request.getEvent().getId(),
-                        Collectors.counting()
-                ));
     }
 }
