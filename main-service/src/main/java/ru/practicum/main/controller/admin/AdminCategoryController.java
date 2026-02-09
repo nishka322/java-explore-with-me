@@ -7,7 +7,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.main.dto.category.CategoryDto;
 import ru.practicum.main.dto.category.NewCategoryDto;
+import ru.practicum.main.exception.CategoryNotEmptyException;
 import ru.practicum.main.service.CategoryService;
+import ru.practicum.main.service.EventService;
 
 @RestController
 @RequestMapping(path = "/admin/categories")
@@ -15,6 +17,7 @@ import ru.practicum.main.service.CategoryService;
 @Validated
 public class AdminCategoryController {
     private final CategoryService categoryService;
+    private final EventService eventService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -25,6 +28,9 @@ public class AdminCategoryController {
     @DeleteMapping("/{catId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCategory(@PathVariable Long catId) {
+        if (eventService.existsByCategoryId(catId)) {
+            throw new CategoryNotEmptyException("Category is not empty");
+        }
         categoryService.deleteCategory(catId);
     }
 

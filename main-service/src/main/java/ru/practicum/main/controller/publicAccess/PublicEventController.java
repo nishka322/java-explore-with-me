@@ -1,4 +1,4 @@
-package ru.practicum.main.controller._public;
+package ru.practicum.main.controller.publicAccess;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

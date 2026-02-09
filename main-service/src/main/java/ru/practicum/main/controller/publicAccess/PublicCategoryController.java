@@ -1,4 +1,4 @@
-package ru.practicum.main.controller._public;
+package ru.practicum.main.controller.publicAccess;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

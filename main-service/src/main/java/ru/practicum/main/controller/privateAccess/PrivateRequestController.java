@@ -1,4 +1,4 @@
-package ru.practicum.main.controller._private;
+package ru.practicum.main.controller.privateAccess;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

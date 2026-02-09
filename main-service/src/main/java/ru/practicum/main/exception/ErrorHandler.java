@@ -142,4 +142,10 @@ public class ErrorHandler {
     public ErrorResponse handleWrongDataOfEventException(final WrongDataException exception) {
         return new ErrorResponse(exception.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleCategoryNotEmptyException(final CategoryNotEmptyException e) {
+        return new ErrorResponse(e.getMessage());
+    }
 }

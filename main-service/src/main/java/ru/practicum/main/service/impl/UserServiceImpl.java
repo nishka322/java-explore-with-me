@@ -57,4 +57,9 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UserNotExistException(
                         String.format("User with id=%s was not found", userId)));
     }
+
+    @Override
+    public List<User> getUsersByIds(List<Long> userIds) {
+        return userRepository.findAllById(userIds);
+    }
 }

@@ -1,6 +1,7 @@
 package ru.practicum.main.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.hibernate.validator.internal.util.stereotypes.Lazy;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.main.dto.category.CategoryDto;
@@ -21,7 +22,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
-    private final EventService eventService;
     private final CategoryMapper categoryMapper;
 
     @Override
@@ -52,11 +52,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void deleteCategory(Long catId) {
-        if (eventService.existsByCategoryId(catId)) {
-            throw new CategoryIsNotEmptyException("The category is not empty");
-        }
         categoryRepository.deleteById(catId);
     }
+
 
     @Override
     public CategoryDto updateCategory(Long catId, CategoryDto categoryDto) {
@@ -67,5 +65,17 @@ public class CategoryServiceImpl implements CategoryService {
         }
         category.setName(categoryDto.getName());
         return categoryMapper.toCategoryDto(categoryRepository.save(category));
+    }
+
+    @Override
+    public Category getCategoryModelById(Long catId) {
+        return categoryRepository.findById(catId)
+                .orElseThrow(() -> new CategoryNotExistException(
+                        String.format("Category with id=%s was not found", catId)));
+    }
+
+    @Override
+    public List<Category> getCategoriesByIds(List<Long> categoriesIds) {
+        return categoryRepository.findAllById(categoriesIds);
     }
 }
