@@ -1,19 +1,16 @@
 package ru.practicum.main.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.hibernate.validator.internal.util.stereotypes.Lazy;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.main.dto.category.CategoryDto;
 import ru.practicum.main.dto.category.NewCategoryDto;
-import ru.practicum.main.exception.CategoryIsNotEmptyException;
 import ru.practicum.main.exception.CategoryNotExistException;
 import ru.practicum.main.exception.NameAlreadyExistException;
 import ru.practicum.main.mapper.CategoryMapper;
 import ru.practicum.main.model.Category;
 import ru.practicum.main.repository.CategoryRepository;
 import ru.practicum.main.service.CategoryService;
-import ru.practicum.main.service.EventService;
 
 import java.util.List;
 import java.util.stream.Collectors;

@@ -13,7 +13,6 @@ import ru.practicum.main.service.EventParticipationService;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
