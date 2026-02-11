@@ -1,78 +1,54 @@
 package ru.practicum.stats.client;
 
-import jakarta.servlet.http.HttpServletRequest;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import ru.practicum.stats.dto.CreateEndpointHitDto;
-import ru.practicum.stats.dto.ResponseEndpointHitDto;
-import ru.practicum.stats.dto.ViewStats;
+import ru.practicum.stats.dto.EndpointHitDto;
+import ru.practicum.stats.dto.ViewStatsDto;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
-@Component
+@Service
 public class StatsClient {
-
-    private final RestTemplate restTemplate;
     private final String serverUrl;
-    private final String appName;
+    private final RestTemplate restTemplate;
 
-    public StatsClient(
-            RestTemplateBuilder restTemplateBuilder,
-            @Value("${stats.server.url}") String serverUrl,
-            @Value("${spring.application.name}") String appName
-    ) {
-        this.restTemplate = restTemplateBuilder.build();
+    public StatsClient(@Value("${stats-server.url}") String serverUrl, RestTemplate restTemplate) {
         this.serverUrl = serverUrl;
-        this.appName = appName;
+        this.restTemplate = restTemplate;
     }
 
-    public ResponseEndpointHitDto sendHit(HttpServletRequest request) {
-        CreateEndpointHitDto hitDto = CreateEndpointHitDto.builder()
-                .app(appName)
-                .uri(request.getRequestURI())
-                .ip(request.getRemoteAddr())
-                .timestamp(LocalDateTime.now())
-                .build();
+    public void addStats(EndpointHitDto endpointHitDto) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-        ResponseEntity<ResponseEndpointHitDto> response =
-                restTemplate.postForEntity(
-                        serverUrl + "/hit",
-                        hitDto,
-                        ResponseEndpointHitDto.class
-                );
-
-        return response.getBody();
+        HttpEntity<EndpointHitDto> requestEntity = new HttpEntity<>(endpointHitDto, headers);
+        restTemplate.exchange(serverUrl + "/hit", HttpMethod.POST, requestEntity, EndpointHitDto.class);
     }
 
-    public List<ViewStats> getStats(String start, String end, List<String> uris, boolean unique) {
-        String encodedStart = URLEncoder.encode(start, StandardCharsets.UTF_8);
-        String encodedEnd = URLEncoder.encode(end, StandardCharsets.UTF_8);
+    public List<ViewStatsDto> getStats(String start, String end, List<String> uris, Boolean unique) {
 
-        StringBuilder urlBuilder = new StringBuilder(serverUrl)
-                .append("/stats?start=").append(encodedStart)
-                .append("&end=").append(encodedEnd);
+        Map<String, Object> parameters = new HashMap<>();
 
-        if (uris != null && !uris.isEmpty()) {
-            String encodedUris = uris.stream()
-                    .map(uri -> URLEncoder.encode(uri, StandardCharsets.UTF_8))
-                    .collect(Collectors.joining(","));
-            urlBuilder.append("&uris=").append(encodedUris);
+        parameters.put("start", start);
+        parameters.put("end", end);
+        parameters.put("uris", uris);
+        parameters.put("unique", unique);
+        ResponseEntity<String> response = restTemplate.getForEntity(
+                serverUrl + "/stats?start={start}&end={end}&uris={uris}&unique={unique}",
+                String.class, parameters);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return Arrays.asList(objectMapper.readValue(response.getBody(), ViewStatsDto[].class));
+        } catch (JsonProcessingException exception) {
+            throw new RuntimeException(String.format("Json processing error: %s", exception.getMessage()));
         }
-
-        urlBuilder.append("&unique=").append(unique);
-
-        ResponseEntity<ViewStats[]> response =
-                restTemplate.getForEntity(urlBuilder.toString(), ViewStats[].class);
-
-        ViewStats[] body = response.getBody();
-        return body != null ? Arrays.asList(body) : List.of();
     }
 }
