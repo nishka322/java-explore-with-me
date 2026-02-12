@@ -161,7 +161,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     @ResponseBody
-    public ErrorResponse handleCommentConflictException (final CommentConflictException exception) {
+    public ErrorResponse handleCommentConflictException(final CommentConflictException exception) {
         return new ErrorResponse(exception.getMessage());
     }
 
