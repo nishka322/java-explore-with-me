@@ -1,43 +1,19 @@
 package ru.practicum.main.mapper;
 
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import ru.practicum.main.dto.request.RequestDto;
 import ru.practicum.main.model.Request;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-@Component
-public class RequestMapper {
+@Mapper(componentModel = "spring")
+public interface RequestMapper {
 
-    public RequestDto toRequestDto(Request request) {
-        if (request == null) {
-            return null;
-        }
+    @Mapping(target = "event", source = "event.id")
+    @Mapping(target = "requester", source = "requester.id")
+    @Mapping(target = "status", expression = "java(request.getStatus() != null ? request.getStatus().toString() : null)")
+    RequestDto toRequestDto(Request request);
 
-        RequestDto dto = new RequestDto();
-        dto.setId(request.getId());
-        dto.setCreated(request.getCreated());
-        dto.setStatus(String.valueOf(request.getStatus()));
-
-        if (request.getEvent() != null) {
-            dto.setEvent(request.getEvent().getId());
-        }
-
-        if (request.getRequester() != null) {
-            dto.setRequester(request.getRequester().getId());
-        }
-
-        return dto;
-    }
-
-    public List<RequestDto> toRequestDtoList(List<Request> requests) {
-        if (requests == null) {
-            return null;
-        }
-
-        return requests.stream()
-                .map(this::toRequestDto)
-                .collect(Collectors.toList());
-    }
+    List<RequestDto> toRequestDtoList(List<Request> requests);
 }

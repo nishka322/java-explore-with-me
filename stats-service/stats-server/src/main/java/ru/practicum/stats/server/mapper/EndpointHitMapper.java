@@ -1,6 +1,8 @@
 package ru.practicum.stats.server.mapper;
 
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import ru.practicum.stats.dto.EndpointHitDto;
 import ru.practicum.stats.server.config.ConfigUtil;
 import ru.practicum.stats.server.model.EndpointHit;
@@ -8,25 +10,16 @@ import ru.practicum.stats.server.model.EndpointHit;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-@Component
-public class EndpointHitMapper {
+@Mapper(componentModel = "spring")
+public interface EndpointHitMapper {
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(ConfigUtil.DATE);
+    DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(ConfigUtil.DATE);
 
-    public EndpointHit toEntity(EndpointHitDto endpointHitDto) {
-        if (endpointHitDto == null) {
-            return null;
-        }
+    @Mapping(target = "timestamp", source = "timestamp", qualifiedByName = "stringToLocalDateTime")
+    EndpointHit toEntity(EndpointHitDto endpointHitDto);
 
-        EndpointHit endpointHit = new EndpointHit();
-        endpointHit.setApp(endpointHitDto.getApp());
-        endpointHit.setUri(endpointHitDto.getUri());
-        endpointHit.setIp(endpointHitDto.getIp());
-
-        if (endpointHitDto.getTimestamp() != null) {
-            endpointHit.setTimestamp(LocalDateTime.parse(endpointHitDto.getTimestamp(), FORMATTER));
-        }
-
-        return endpointHit;
+    @Named("stringToLocalDateTime")
+    default LocalDateTime stringToLocalDateTime(String timestamp) {
+        return timestamp != null ? LocalDateTime.parse(timestamp, FORMATTER) : null;
     }
 }
